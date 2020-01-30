@@ -2809,7 +2809,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                         orig_span,
                         custom_note.unwrap_or("any code following this expression is unreachable"),
                     )
-                    .emit();
+                    .delay_as_bug();
             }
         }
     }
