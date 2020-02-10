@@ -871,20 +871,28 @@ impl<'tcx> Constructor<'tcx> {
         match self {
             Single | Variant(_) => match ty.kind {
                 ty::Tuple(ref fs) => {
+                    debug!("tuple {:?}", fs);
                     fs.into_iter().map(|t| t.expect_ty()).map(Pat::wildcard_from_ty).collect()
                 }
-                ty::Ref(_, rty, _) => vec![Pat::wildcard_from_ty(rty)],
+                ty::Ref(_, rty, _) => {
+                    debug!("ref {:?}", rty);
+                    vec![Pat::wildcard_from_ty(rty)]
+                },
                 ty::Adt(adt, substs) => {
+                    debug!("adt {:?} {:?}", adt, substs);
                     if adt.is_box() {
+                        debug!("is_box");
                         // Use T as the sub pattern type of Box<T>.
                         vec![Pat::wildcard_from_ty(substs.type_at(0))]
                     } else {
+                        debug!("not is_box");
                         let variant = &adt.variants[self.variant_index_for_adt(cx, adt)];
                         let is_non_exhaustive = cx.is_foreign_non_exhaustive_variant(ty, variant);
                         variant
                             .fields
                             .iter()
                             .map(|field| {
+                                debug!("field {:?}", field);
                                 let is_visible = adt.is_enum()
                                     || field.vis.is_accessible_from(cx.module, cx.tcx);
                                 let is_uninhabited = cx.is_uninhabited(field.ty(cx.tcx, substs));
